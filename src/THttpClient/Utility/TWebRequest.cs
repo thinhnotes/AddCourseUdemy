@@ -78,6 +78,7 @@ namespace THttpClient.Utility
                 {
                     response = await client.GetAsync(Uri);
                 }
+                CookieCollection = CookieContainer.GetCookies(Uri);
                 return response;
             }
         }
@@ -111,6 +112,15 @@ namespace THttpClient.Utility
             }
             //CookieCollection.Add(response.Cookies);
             Stream responseStream = await response.Content.ReadAsStreamAsync();
+
+            var cookieHeaders = response.Headers.Where(pair => pair.Key == "Set-Cookie").ToList();
+            foreach (var cookie in cookieHeaders.FirstOrDefault().Value)
+            {
+                var keyCookie = cookie.Split(';').First();
+                if (keyCookie.Contains("access_token") || keyCookie.Contains("client_id"))
+                    CookieContainer.SetCookies(Uri, keyCookie);
+            }
+            CookieCollection = CookieContainer.GetCookies(Uri);
             return responseStream;
         }
 
@@ -165,6 +175,8 @@ namespace THttpClient.Utility
                 handler.CookieContainer = new CookieContainer();
             }
             handler.CookieContainer = CookieContainer;
+            if (CookieCollection != null)
+                handler.CookieContainer.Add(Uri, CookieCollection);
             var client = new HttpClient(handler);
             SetInitHttpClient(client);
             return client;

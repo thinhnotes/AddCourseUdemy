@@ -18,7 +18,7 @@ namespace AddCourseUdemyDemo
                 {
                     if (File.Exists(args[2]))
                     {
-                        var readAllLines = File.ReadAllLines(args[3]);
+                        var readAllLines = File.ReadAllLines(args[2]);
                         foreach (var line in readAllLines)
                         {
                             var addLink = udemyClient.AddLink(line);

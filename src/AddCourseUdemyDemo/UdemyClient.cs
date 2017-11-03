@@ -10,20 +10,28 @@ namespace AddCourseUdemyDemo
     {
         public bool Login(string user, string pass)
         {
-            string url = "https://www.udemy.com/join/login-popup/";
-            Get(url);
-            var cookieCollection = this.CookieContainer.GetCookies(new Uri(url));
-            var cookie = cookieCollection["csrftoken"];
-            Referer = url;
+            var csrfToken = GetCsrfToken();
 
-            string urlData = $"csrfmiddlewaretoken={cookie.Value}&locale=en_US&email={WebUtility.UrlEncode(user)}&password={WebUtility.UrlEncode(pass)}";
+            string urlData = $"csrfmiddlewaretoken={csrfToken}&locale=en_US&email={WebUtility.UrlEncode(user)}&password={WebUtility.UrlEncode(pass)}";
             Location = null;
+            CookieCollection.Add(new Cookie("csrftoken", csrfToken));
+            Referer = "https://www.udemy.com/join/login-popup/?next=/user/edit-profile/";
             Post("https://www.udemy.com/join/login-popup/", urlData);
             if (Location != null)
             {
+                Referer = null;
                 return true;
             }
             return false;
+        }
+
+        public string GetCsrfToken()
+        {
+            Get("https://www.udemy.com");
+            string url = "https://www.udemy.com/join/login-popup/";
+            var content = Get(url);
+            var regex = new Regex("name='csrfmiddlewaretoken' value='(?<key>.+)'");
+            return regex.Match(content).Groups["key"]?.Value;
         }
 
         public bool AddLink(string url)
@@ -48,14 +56,23 @@ namespace AddCourseUdemyDemo
         public bool CheckOut(string courseId, string coupon)
         {
             string url = $"https://www.udemy.com/payment/checkout/?boType=course&boId={courseId}&couponCode={coupon}";
-            var content = Get(url);
-            var regex = new Regex("data-url=\"(?<key>[a-z/\\dA-Z]+)\"");
-            return string.IsNullOrWhiteSpace(regex.Match(content).Groups["key"]?.Value);
+            Get("https://www.udemy.com");
+            Location = null;
+            Get(url);
+            if (Location == null) return false;
+            Get(Location);
+            if (Location == null) return false;
+            var successContent = Get(Location);
+            if (successContent.Contains("Congratulations! You've successfully enrolled in"))
+            {
+                return true;
+            }
+            return false;
         }
 
         public string GetCounpon(string url)
         {
-            var regex = new Regex("couponCode=(?<key>[A-Za-z\\-\\d]+)&");
+            var regex = new Regex("couponCode=(?<key>[A-Za-z\\-\\d]+)");
             return regex.Match(url).Groups["key"]?.Value;
         }
     }
