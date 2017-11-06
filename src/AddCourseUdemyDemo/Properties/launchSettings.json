@@ -17,8 +17,7 @@
     },
     "AddCourseUdemyDemo": {
       "commandName": "Project",
-      "commandLineArgs": "thienlong0033@gmail.com thienthanh file.txt",
-      "launchBrowser": true,
+      "commandLineArgs": "thienlong0033@gmail.com test123 file.txt",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

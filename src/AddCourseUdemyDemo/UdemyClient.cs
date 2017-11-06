@@ -34,23 +34,40 @@ namespace AddCourseUdemyDemo
             return regex.Match(content).Groups["key"]?.Value;
         }
 
-        public bool AddLink(string url)
+        public int AddLink(string url)
         {
+            if (CheckRegistedCourse(url))
+            {
+                return 1;
+            }
             var idCourse = GetIdCourse(url);
             var counpon = GetCounpon(url);
             var checkOut = CheckOut(idCourse, counpon);
             if (checkOut)
             {
                 Get(url, true);
+                return 0;
             }
-            return checkOut;
+            return  -1;
         }
 
         public string GetIdCourse(string url)
         {
+            Location = null;
             var content = Get(url);
             var regex = new Regex("data-clp-course-id=\"(?<key>\\d+)");
             return regex.Match(content).Groups["key"]?.Value;
+        }
+
+        public bool CheckRegistedCourse(string url)
+        {
+            Location = null;
+            var content = Get(url);
+            if (string.IsNullOrWhiteSpace(content) || !string.IsNullOrWhiteSpace(Location))
+            {
+                return true;
+            }
+            return false;
         }
 
         public bool CheckOut(string courseId, string coupon)
@@ -62,8 +79,7 @@ namespace AddCourseUdemyDemo
             if (Location == null) return false;
             Get(Location);
             if (Location == null) return false;
-            var successContent = Get(Location);
-            if (successContent.Contains("Congratulations! You've successfully enrolled in"))
+            if (Location.Contains("https://www.udemy.com/cart/success"))
             {
                 return true;
             }

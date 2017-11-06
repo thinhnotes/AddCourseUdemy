@@ -33,16 +33,21 @@ namespace AddCourseUdemyDemo
             }
         }
 
-        public static void ShowConsole(bool isSucess)
+        public static void ShowConsole(int isSucess)
         {
-            if (isSucess)
+            if (isSucess == 1)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Already!");
+            }
+            else if (isSucess == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Success!");
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Green;
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Error!");
             }
             Console.ResetColor();

@@ -48,6 +48,11 @@ namespace THttpClient.Utility
         protected bool Gzip { get; set; }
         private Uri Uri { get; set; }
 
+        private Uri UriHost
+        {
+            get { return new Uri(Uri.Scheme + "://" + Uri.Host); }
+        }
+
         private async Task<HttpResponseMessage> GetResponse(string url, string postData = null, string method = "GET")
         {
             Uri = new Uri(url);
@@ -78,7 +83,7 @@ namespace THttpClient.Utility
                 {
                     response = await client.GetAsync(Uri);
                 }
-                CookieCollection = CookieContainer.GetCookies(Uri);
+                CookieCollection = CookieContainer.GetCookies(UriHost);
                 return response;
             }
         }
@@ -111,16 +116,27 @@ namespace THttpClient.Utility
                 }
             }
             //CookieCollection.Add(response.Cookies);
+            CookieCollection = new CookieCollection();
             Stream responseStream = await response.Content.ReadAsStreamAsync();
 
             var cookieHeaders = response.Headers.Where(pair => pair.Key == "Set-Cookie").ToList();
             foreach (var cookie in cookieHeaders.FirstOrDefault().Value)
             {
-                var keyCookie = cookie.Split(';').First();
-                if (keyCookie.Contains("access_token") || keyCookie.Contains("client_id"))
-                    CookieContainer.SetCookies(Uri, keyCookie);
+                var cookieValues = cookie.Split(';');
+                var keyCookie = cookieValues.First();
+                var keyValue = keyCookie.Split('=');
+                if (!string.IsNullOrEmpty(keyValue[1]))
+                {
+                    //var addCookie = new Cookie(keyValue[0], keyValue[1]);
+                    //foreach (var cookieValue in cookieValues)
+                    //{
+                        
+                    //}
+                    //if (keyCookie.Contains("access_token") || keyCookie.Contains("client_id"))
+                        CookieContainer.SetCookies(UriHost, keyCookie);
+                }
             }
-            CookieCollection = CookieContainer.GetCookies(Uri);
+            CookieCollection = CookieContainer.GetCookies(UriHost);
             return responseStream;
         }
 
@@ -174,9 +190,23 @@ namespace THttpClient.Utility
             {
                 handler.CookieContainer = new CookieContainer();
             }
-            handler.CookieContainer = CookieContainer;
+            //handler.CookieContainer = CookieContainer;
+            handler.CookieContainer = new CookieContainer();
             if (CookieCollection != null)
+            {
                 handler.CookieContainer.Add(Uri, CookieCollection);
+                //var cookieCollection = handler.CookieContainer.GetCookies(UriHost);
+                //foreach (Cookie cookie in CookieCollection)
+                //{
+                //    //foreach (Cookie currentCookie in cookieCollection)
+                //    //{
+                //        //if (currentCookie.Name != cookie.Name)
+                //        //{
+                            
+                //        //}
+                //    //}
+                //}
+            }
             var client = new HttpClient(handler);
             SetInitHttpClient(client);
             return client;
@@ -194,6 +224,29 @@ namespace THttpClient.Utility
             }
             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", UserAngent);
         }
+
+        //private CookieCollection GetCookies(CookieContainer cookies)
+        //{
+        //    var cookies = new CookieCollection();
+        //    Hashtable table = (Hashtable)cookies.GetType().InvokeMember("m_domainTable",
+        //        BindingFlags.NonPublic |
+        //        BindingFlags.GetField |
+        //        BindingFlags.Instance,
+        //        null,
+        //        cookies,
+        //        new object[] { });
+
+
+
+        //    foreach (var key in table.Keys)
+        //    {
+        //        foreach (Cookie cookie in cookies.GetCookies(new Uri(string.Format("http://{0}/", key))))
+        //        {
+        //            cookies.Add(cookie);
+        //        }
+        //    }
+        //    return cookies;
+        //}
     }
 
     public enum TypeRequest
