@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Web;
 
-namespace THttpClient
+namespace THttpWebRequest.Utility
 {
     public static class UtilityString
     {
@@ -18,10 +19,10 @@ namespace THttpClient
             return false;
         }
 
-        //public static string HtmlDecode(this string str)
-        //{
-        //    re
-        //}
+        public static string HtmlDecode(this string str)
+        {
+            return HttpUtility.HtmlDecode(str);
+        }
 
         public static string SubStringSpaceLengh(this string str, int lenght)
         {

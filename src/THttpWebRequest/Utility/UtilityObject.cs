@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace THttpClient
+namespace THttpWebRequest.Utility
 {
     public static class UtilityObject
     {
